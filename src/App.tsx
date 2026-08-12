@@ -58,7 +58,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col justify-between">
+    <div className="min-h-screen max-w-full overflow-x-hidden bg-slate-50 text-slate-900 font-sans antialiased flex flex-col justify-between">
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}

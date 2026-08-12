@@ -149,14 +149,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const getUnitName = (unitId: string) => units.find((u) => u.id === unitId)?.name || 'Unit';
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-2 sm:p-4 md:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Calendar Top Control Header */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Title & Today's Summary */}
         <div>
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-blue-600" />
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Operational Control Center</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Operational Control Center</h1>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Real-time occupancy calendar & guest checkout workflow dispatcher.
@@ -164,14 +164,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </div>
 
         {/* Navigation & Controls */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Unit Filter */}
           <div className="flex items-center gap-2">
             <label className="text-xs font-bold text-slate-600 hidden sm:inline">Filter Unit:</label>
             <select
               value={selectedUnitId}
               onChange={(e) => setSelectedUnitId(e.target.value)}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 border border-slate-300 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 border border-slate-300 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Units ({units.length})</option>
               {units.map((u) => (
@@ -186,7 +186,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
               onClick={() => setViewMode('month')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'month' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -194,7 +194,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
             <button
               onClick={() => setViewMode('week')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'week' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -202,7 +202,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
             <button
               onClick={() => setViewMode('day')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'day' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -220,7 +220,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
             <button
               onClick={handleToday}
-              className="px-3 py-1 text-xs font-bold text-slate-800 hover:bg-slate-200 rounded-lg transition-colors"
+              className="px-2.5 sm:px-3 py-1 text-xs font-bold text-slate-800 hover:bg-slate-200 rounded-lg transition-colors"
             >
               Today
             </button>
@@ -233,7 +233,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {onOpenCustomerLookupModal && (
               <button
                 onClick={onOpenCustomerLookupModal}
@@ -289,15 +289,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       )}
 
       {/* Date Title Banner */}
-      <div className="flex items-center justify-between px-2">
-        <h2 className="text-lg font-bold text-slate-800">
+      <div className="flex items-center justify-between px-2 flex-wrap gap-2">
+        <h2 className="text-base sm:text-lg font-bold text-slate-800">
           {currentDate.toLocaleDateString('en-US', {
             month: 'long',
             year: 'numeric',
             ...(viewMode === 'day' ? { day: 'numeric', weekday: 'long' } : {}),
           })}
         </h2>
-        <div className="flex items-center gap-3 text-xs font-medium text-slate-600 flex-wrap">
+        <div className="flex items-center gap-2.5 text-xs font-medium text-slate-600 flex-wrap">
           <span className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-400"></span> Tarikh Lepas
           </span>
@@ -318,20 +318,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* MONTH VIEW */}
       {viewMode === 'month' && (
-        <div className="bg-white rounded-xl border border-slate-300 shadow-sm overflow-hidden">
-          {/* Day of Week Headers */}
-          <div className="grid grid-cols-7 bg-slate-100 border-b border-slate-300 text-center text-xs font-bold text-slate-700 py-2.5">
-            <div>Sun</div>
-            <div>Mon</div>
-            <div>Tue</div>
-            <div>Wed</div>
-            <div>Thu</div>
-            <div>Fri</div>
-            <div>Sat</div>
-          </div>
+        <div className="bg-white rounded-xl border border-slate-300 shadow-sm overflow-x-auto">
+          <div className="min-w-[680px] md:min-w-0">
+            {/* Day of Week Headers */}
+            <div className="grid grid-cols-7 bg-slate-100 border-b border-slate-300 text-center text-xs font-bold text-slate-700 py-2.5">
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
 
-          {/* Grid Cells */}
-          <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-300">
+            {/* Grid Cells */}
+            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-300">
             {monthDays.map((dayObj, index) => {
               // Find all bookings across active units for this day
               const dayBookings: Array<{ booking: Booking; unit: Unit }> = [];
@@ -449,6 +450,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             })}
           </div>
         </div>
+      </div>
       )}
 
       {/* WEEK & DAY VIEWS: Detailed Operational Gantt Matrix */}

@@ -107,18 +107,22 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
       {/* Top Banner: Role Switcher & Property Identity */}
-      <div className="bg-slate-900 text-white px-4 py-2.5 flex flex-wrap items-center justify-between text-xs sm:text-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-slate-800 rounded flex items-center justify-center p-1 shadow-xs shrink-0 border border-slate-700">
+      <div className="bg-slate-900 text-white px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className="flex items-center gap-2 shrink-0 cursor-pointer group text-left focus:outline-none"
+          title="Kembali ke Laman Utama (Calendar)"
+        >
+          <div className="w-6 h-6 sm:w-7 sm:h-7 bg-slate-800 group-hover:bg-slate-700 rounded flex items-center justify-center p-1 shadow-xs shrink-0 border border-slate-700 transition-colors">
             <img src="/favicon.svg" alt="Homestay Logo" className="w-full h-full object-contain" />
           </div>
-          <div className="flex items-center gap-2 font-bold text-slate-100 tracking-tight">
-            <span>{settings.propertyName || 'HOMS'}</span>
-            <span className="font-normal text-slate-400">| Operations</span>
+          <div className="flex items-center gap-1.5 font-bold text-slate-100 group-hover:text-white tracking-tight text-xs sm:text-sm max-w-[130px] sm:max-w-none truncate transition-colors">
+            <span className="truncate">{settings.propertyName || 'HOMS'}</span>
+            <span className="font-normal text-slate-400 hidden xs:inline">| Ops</span>
           </div>
-        </div>
+        </button>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap">
           {/* Unified Booking Search / Adjustment Button */}
           {(onOpenCustomerLookupModal || onOpenAdjustmentModal) && (
             <button
@@ -131,11 +135,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onOpenAdjustmentModal();
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
               title="Cari, semak atau laraskan tempahan"
             >
-              <Search className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Cari Tempahan</span>
+              <Search className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="hidden sm:inline">Cari Tempahan</span>
+              <span className="sm:hidden">Cari</span>
             </button>
           )}
 
@@ -143,14 +148,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700">
             <button
               onClick={() => setCurrentRole('CUSTOMER')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all ${
                 currentRole === 'CUSTOMER'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              <User className="w-3.5 h-3.5" />
-              <span>Customer</span>
+              <User className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Customer</span>
+              <span className="sm:hidden">Cust</span>
             </button>
             <button
               onClick={() => {
@@ -164,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }
                 }
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all ${
                 currentRole === 'OWNER' || isAdminUnlocked
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-300 hover:text-white'
@@ -173,26 +179,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               {isAdminUnlocked ? (
                 <>
-                  <span className="text-[12px] leading-none">🟢</span>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Owner / Admin (Aktif)</span>
+                  <span className="text-[10px] leading-none">🟢</span>
+                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Owner / Admin</span>
+                  <span className="md:hidden">Admin</span>
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Owner / Admin</span>
+                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Owner / Admin</span>
+                  <span className="md:hidden">Admin</span>
                 </>
               )}
             </button>
             <button
               onClick={() => setCurrentRole('CLEANER')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all ${
                 currentRole === 'CLEANER'
                   ? 'bg-amber-600 text-white shadow-xs'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              <UserCheck className="w-3.5 h-3.5" />
+              <UserCheck className="w-3.5 h-3.5 shrink-0" />
               <span>Cleaner</span>
             </button>
           </div>
