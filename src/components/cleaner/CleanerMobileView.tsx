@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { validateChecklistCompletion } from '../../services/validationService';
 import { IssueCategory, IssuePriority } from '../../types';
@@ -38,6 +38,20 @@ export const CleanerMobileView: React.FC = () => {
   const [notesInput, setNotesInput] = useState<string>(activeTask?.notes || '');
   const [showIssueModal, setShowIssueModal] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowIssueModal(false);
+      }
+    };
+    if (showIssueModal) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showIssueModal]);
 
   // Issue reporting form state
   const [issueCategory, setIssueCategory] = useState<IssueCategory>('Air conditioner');

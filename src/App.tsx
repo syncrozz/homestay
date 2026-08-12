@@ -13,6 +13,9 @@ import { DashboardView } from './components/dashboard/DashboardView';
 import { AdminSettingsView } from './components/admin/AdminSettingsView';
 import { CleanerMobileView } from './components/cleaner/CleanerMobileView';
 import { BookingModal } from './components/bookings/BookingModal';
+import { BookingAdjustmentModal } from './components/bookings/BookingAdjustmentModal';
+import { CustomerBookingLookupModal } from './components/customer/CustomerBookingLookupModal';
+import { AdminPinModal } from './components/admin/AdminPinModal';
 import { Booking } from './types';
 
 const MainContent: React.FC = () => {
@@ -24,6 +27,16 @@ const MainContent: React.FC = () => {
   const [editingBooking, setEditingBooking] = useState<Booking | undefined>(undefined);
   const [modalUnitId, setModalUnitId] = useState<string | undefined>(undefined);
   const [modalDateStr, setModalDateStr] = useState<string | undefined>(undefined);
+
+  // Booking adjustment modal state
+  const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
+  const [adjustmentBooking, setAdjustmentBooking] = useState<Booking | undefined>(undefined);
+
+  // Customer lookup modal state
+  const [isCustomerLookupModalOpen, setIsCustomerLookupModalOpen] = useState(false);
+
+  // Admin PIN modal state
+  const [isAdminPinModalOpen, setIsAdminPinModalOpen] = useState(false);
 
   const handleOpenNewBooking = (unitId?: string, dateStr?: string) => {
     setEditingBooking(undefined);
@@ -39,9 +52,20 @@ const MainContent: React.FC = () => {
     setIsBookingModalOpen(true);
   };
 
+  const handleOpenAdjustmentBooking = (booking?: Booking) => {
+    setAdjustmentBooking(booking);
+    setIsAdjustmentModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col justify-between">
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenAdjustmentModal={() => handleOpenAdjustmentBooking()}
+        onOpenCustomerLookupModal={() => setIsCustomerLookupModalOpen(true)}
+        onOpenAdminPinModal={() => setIsAdminPinModalOpen(true)}
+      />
 
       <main className="flex-1 pb-8">
         {currentRole === 'CLEANER' ? (
@@ -52,6 +76,8 @@ const MainContent: React.FC = () => {
               <CalendarView
                 onOpenNewBookingModal={handleOpenNewBooking}
                 onOpenBookingDetailsModal={handleOpenEditBooking}
+                onOpenAdjustmentModal={handleOpenAdjustmentBooking}
+                onOpenCustomerLookupModal={() => setIsCustomerLookupModalOpen(true)}
               />
             )}
             {activeTab === 'today' && <TodayOperationsView />}
@@ -62,6 +88,7 @@ const MainContent: React.FC = () => {
               <BookingListView
                 onOpenNewBookingModal={() => handleOpenNewBooking()}
                 onOpenEditBookingModal={handleOpenEditBooking}
+                onOpenAdjustmentModal={handleOpenAdjustmentBooking}
               />
             )}
             {activeTab === 'maintenance' && <MaintenanceView />}
@@ -82,7 +109,7 @@ const MainContent: React.FC = () => {
           <span className="text-slate-400 hidden sm:inline italic">HOMS Ops Console v1.2</span>
         </div>
         <div className="flex items-center gap-4 text-slate-300">
-          <span>Property: <span className="text-blue-300 font-semibold">{settings.propertyName || 'Your Homestay'}</span></span>
+          <span>Property: <span className="text-blue-300 font-semibold">{settings.propertyName || 'Homestay'}</span></span>
         </div>
       </footer>
 
@@ -92,6 +119,23 @@ const MainContent: React.FC = () => {
         existingBooking={editingBooking}
         initialUnitId={modalUnitId}
         initialDateStr={modalDateStr}
+      />
+
+      <BookingAdjustmentModal
+        isOpen={isAdjustmentModalOpen}
+        onClose={() => setIsAdjustmentModalOpen(false)}
+        booking={adjustmentBooking}
+      />
+
+      <CustomerBookingLookupModal
+        isOpen={isCustomerLookupModalOpen}
+        onClose={() => setIsCustomerLookupModalOpen(false)}
+        onOpenNewBooking={() => handleOpenNewBooking()}
+      />
+
+      <AdminPinModal
+        isOpen={isAdminPinModalOpen}
+        onClose={() => setIsAdminPinModalOpen(false)}
       />
     </div>
   );

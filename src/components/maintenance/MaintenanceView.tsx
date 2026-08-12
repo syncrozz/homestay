@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MaintenanceIssue, IssueCategory, IssuePriority, UnitStatus } from '../../types';
 import { Wrench, AlertTriangle, CheckCircle2, ShieldAlert, Plus, Camera } from 'lucide-react';
@@ -15,6 +15,21 @@ export const MaintenanceView: React.FC = () => {
   const [resolvingIssue, setResolvingIssue] = useState<MaintenanceIssue | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [targetStatus, setTargetStatus] = useState<UnitStatus>('READY');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (resolvingIssue) setResolvingIssue(null);
+      }
+    };
+    if (showModal || resolvingIssue) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal, resolvingIssue]);
 
   const openReport = () => {
     setShowModal(true);

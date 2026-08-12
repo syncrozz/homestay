@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Unit } from '../../types';
 import { UnitStatusBadge } from '../common/StatusBadge';
@@ -16,6 +16,20 @@ export const UnitManagementView: React.FC = () => {
   const [capacity, setCapacity] = useState(4);
   const [defaultCheckIn, setDefaultCheckIn] = useState('15:00');
   const [defaultCheckOut, setDefaultCheckOut] = useState('12:00');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowModal(false);
+      }
+    };
+    if (showModal) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showModal]);
 
   const openCreate = () => {
     setEditingUnit(null);

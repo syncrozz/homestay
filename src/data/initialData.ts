@@ -14,7 +14,7 @@ import {
 
 export const initialProperty: Property = {
   id: 'prop-1',
-  name: 'Your Homestay',
+  name: 'Homestay',
   address: 'Jalan Beachfront Villa 1, 80000 Penang, Malaysia',
   contactNumber: '+60123456789',
   defaultCheckInTime: '15:00',
@@ -22,7 +22,7 @@ export const initialProperty: Property = {
 };
 
 export const initialSettings: SystemSettings = {
-  propertyName: 'Your Homestay',
+  propertyName: 'Homestay',
   propertyAddress: 'Jalan Beachfront Villa 1, Penang',
   propertyContact: '+60123456789',
   defaultCheckInTime: '15:00',
@@ -41,11 +41,27 @@ Thank you!`,
 
 Thank you for choosing {property_name}!
 
-Your reservation for {unit_name} is confirmed.
+Reservation for {unit_name} is confirmed.
 Check-in time: {check_in_time} on {check_in_date}.
 Check-out time: {check_out_time} on {check_out_date}.
 
 If you need anything prior to arrival, feel free to reply to this message. See you soon!`,
+  whatsappOwnerAlertTemplate: `📢 TEMPAHAN BAHARU DISAHKAN!
+
+Homestay: {property_name}
+Unit: {unit_name}
+Tetamu: {guest_name} ({guest_phone})
+Bilangan Tetamu: {guest_count} pax
+
+📅 Check-in: {check_in_date} ({check_in_time})
+📅 Check-out: {check_out_date} ({check_out_time})
+
+💰 Status Bayaran: {payment_status}
+💵 Jumlah: RM {total_amount}
+💳 Deposit: RM {deposit_amount}
+⚠️ Baki Belum Bayar: RM {balance_amount}
+{remark_section}
+Terima Kasih Menggunakan Perkhidmatan Kami.`,
 };
 
 export const initialUnits: Unit[] = [
@@ -144,6 +160,7 @@ export const initialBookings: Booking[] = [
     unitId: 'unit-a',
     guestName: 'Ahmad Razak',
     guestPhone: '+60129998877',
+    guestEmail: 'ahmad@gmail.com',
     checkInDate: getRelativeDateStr(-2),
     checkInTime: '15:00',
     checkOutDate: getRelativeDateStr(0), // Checkout TODAY
@@ -163,6 +180,7 @@ export const initialBookings: Booking[] = [
     unitId: 'unit-a',
     guestName: 'Siti Sarah',
     guestPhone: '+60134445566',
+    guestEmail: 'siti@gmail.com',
     checkInDate: getRelativeDateStr(0), // Checkin TODAY afternoon
     checkInTime: '15:00',
     checkOutDate: getRelativeDateStr(2),
@@ -182,6 +200,7 @@ export const initialBookings: Booking[] = [
     unitId: 'unit-b',
     guestName: 'David Tan',
     guestPhone: '+60161112233',
+    guestEmail: 'david@gmail.com',
     checkInDate: getRelativeDateStr(1),
     checkInTime: '15:00',
     checkOutDate: getRelativeDateStr(3),
@@ -200,6 +219,7 @@ export const initialBookings: Booking[] = [
     unitId: 'unit-c',
     guestName: 'Nadia Ibrahim',
     guestPhone: '+60198887766',
+    guestEmail: 'nadia@gmail.com',
     checkInDate: getRelativeDateStr(-1),
     checkInTime: '15:00',
     checkOutDate: getRelativeDateStr(1),

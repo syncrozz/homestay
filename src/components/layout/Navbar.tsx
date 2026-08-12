@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Calendar as CalendarIcon,
@@ -14,7 +14,10 @@ import {
   Bell,
   RefreshCw,
   UserCheck,
-  ShieldCheck
+  ShieldCheck,
+  Sliders,
+  Search,
+  User
 } from 'lucide-react';
 
 export type ActiveTab =
@@ -32,12 +35,23 @@ export type ActiveTab =
 interface NavbarProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
+  onOpenAdjustmentModal?: () => void;
+  onOpenCustomerLookupModal?: () => void;
+  onOpenAdminPinModal?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  setActiveTab,
+  onOpenAdjustmentModal,
+  onOpenCustomerLookupModal,
+  onOpenAdminPinModal,
+}) => {
   const {
     currentRole,
     setCurrentRole,
+    isAdminUnlocked,
+    lockAdminMode,
     settings,
     inventory,
     cleaningTasks,
@@ -48,6 +62,20 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   } = useApp();
 
   const [showAlertsDrawer, setShowAlertsDrawer] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAlertsDrawer(false);
+      }
+    };
+    if (showAlertsDrawer) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showAlertsDrawer]);
 
   // Compute operational alerts
   const lowStockCount = inventory.filter(i => i.currentStock <= i.minimumStock).length;
@@ -73,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     { id: 'maintenance', label: 'Maintenance', icon: Wrench, badge: openMaintenanceCount },
     { id: 'inventory', label: 'Inventory', icon: Package, badge: lowStockCount },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'admin', label: 'Admin', icon: Settings },
+    { id: 'admin', label: 'Setting', icon: Settings },
   ];
 
   return (
@@ -81,8 +109,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
       {/* Top Banner: Role Switcher & Property Identity */}
       <div className="bg-slate-900 text-white px-4 py-2.5 flex flex-wrap items-center justify-between text-xs sm:text-sm">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-base italic shadow-xs shrink-0">
-            H
+          <div className="w-7 h-7 bg-slate-800 rounded flex items-center justify-center p-1 shadow-xs shrink-0 border border-slate-700">
+            <img src="/favicon.svg" alt="Homestay Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex items-center gap-2 font-bold text-slate-100 tracking-tight">
             <span>{settings.propertyName || 'HOMS'}</span>
@@ -90,19 +118,71 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Role Switcher */}
+        <div className="flex items-center gap-2.5">
+          {/* Unified Booking Search / Adjustment Button */}
+          {(onOpenCustomerLookupModal || onOpenAdjustmentModal) && (
+            <button
+              onClick={() => {
+                if (currentRole === 'OWNER' && onOpenAdjustmentModal) {
+                  onOpenAdjustmentModal();
+                } else if (onOpenCustomerLookupModal) {
+                  onOpenCustomerLookupModal();
+                } else if (onOpenAdjustmentModal) {
+                  onOpenAdjustmentModal();
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              title="Cari, semak atau laraskan tempahan"
+            >
+              <Search className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Cari Tempahan</span>
+            </button>
+          )}
+
+          {/* Role Switcher with Integrated Admin Status Indicator */}
           <div className="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700">
             <button
-              onClick={() => setCurrentRole('OWNER')}
+              onClick={() => setCurrentRole('CUSTOMER')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                currentRole === 'OWNER'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                currentRole === 'CUSTOMER'
+                  ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Owner</span>
+              <User className="w-3.5 h-3.5" />
+              <span>Customer</span>
+            </button>
+            <button
+              onClick={() => {
+                if (isAdminUnlocked) {
+                  lockAdminMode();
+                  setCurrentRole('CUSTOMER');
+                } else {
+                  setCurrentRole('OWNER');
+                  if (onOpenAdminPinModal) {
+                    onOpenAdminPinModal();
+                  }
+                }
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                currentRole === 'OWNER' || isAdminUnlocked
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+              title={isAdminUnlocked ? 'Mod Admin Aktif (Klik untuk kunci & kembali ke paparan Customer)' : 'Klik untuk akses Mod Admin (PIN)'}
+            >
+              {isAdminUnlocked ? (
+                <>
+                  <span className="text-[12px] leading-none">🟢</span>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Owner / Admin (Aktif)</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Owner / Admin</span>
+                </>
+              )}
             </button>
             <button
               onClick={() => setCurrentRole('CLEANER')}

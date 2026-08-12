@@ -3,7 +3,7 @@
  */
 
 // User & Role Types
-export type UserRole = 'OWNER' | 'CLEANER';
+export type UserRole = 'OWNER' | 'CLEANER' | 'CUSTOMER';
 
 export interface UserProfile {
   id: string;
@@ -59,6 +59,7 @@ export interface Booking {
   unitId: string;
   guestName: string;
   guestPhone: string;
+  guestEmail?: string;
   guestId?: string;
   checkInDate: string; // YYYY-MM-DD
   checkInTime: string; // HH:MM (e.g. "15:00")
@@ -202,4 +203,5 @@ export interface SystemSettings {
   defaultCheckOutTime: string;
   whatsappCleanerTemplate: string;
   whatsappGuestCheckInTemplate: string;
+  whatsappOwnerAlertTemplate?: string;
 }

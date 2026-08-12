@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Package, AlertTriangle, Plus, Minus, CheckCircle2 } from 'lucide-react';
 
@@ -11,6 +11,20 @@ export const InventoryView: React.FC = () => {
   const [minimumStock, setMinimumStock] = useState(5);
   const [unit, setUnit] = useState('rolls');
   const [category, setCategory] = useState('Bathroom');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAddModal(false);
+      }
+    };
+    if (showAddModal) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showAddModal]);
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();

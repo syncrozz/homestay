@@ -53,6 +53,11 @@ interface AppState {
 }
 
 interface AppContextType extends AppState {
+  // Admin Mode state
+  isAdminUnlocked: boolean;
+  unlockAdminMode: (pin: string) => { success: boolean; error?: string };
+  lockAdminMode: () => void;
+
   // Role & Mode switching
   setCurrentRole: (role: UserRole) => void;
   setCurrentCleanerId: (cleanerId: string) => void;
@@ -67,6 +72,7 @@ interface AppContextType extends AppState {
   createBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => { success: boolean; error?: string };
   updateBooking: (booking: Booking) => { success: boolean; error?: string };
   cancelBooking: (bookingId: string) => void;
+  deleteBookingPermanently: (bookingId: string) => void;
   markGuestCheckedOut: (bookingId: string) => void;
   approveEarlyCheckIn: (bookingId: string, allowedTime: string) => void;
 
@@ -116,7 +122,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed.settings) {
+          if (
+            !parsed.settings.whatsappOwnerAlertTemplate ||
+            parsed.settings.whatsappOwnerAlertTemplate.includes('Mohon pemilik / pengurus mengambil maklum')
+          ) {
+            parsed.settings.whatsappOwnerAlertTemplate = initialSettings.whatsappOwnerAlertTemplate;
+          }
+          if (!parsed.settings.propertyName || parsed.settings.propertyName.toLowerCase().includes('your')) {
+            parsed.settings.propertyName = (parsed.settings.propertyName || '').replace(/your\s*/gi, '').trim() || 'Homestay';
+          }
+        }
+        if (parsed.property) {
+          if (!parsed.property.name || parsed.property.name.toLowerCase().includes('your')) {
+            parsed.property.name = (parsed.property.name || '').replace(/your\s*/gi, '').trim() || 'Homestay';
+          }
+        }
+        return parsed;
       } catch (e) {
         console.error('Failed to parse saved state, resetting to initial data', e);
       }
@@ -137,6 +160,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       auditLogs: initialAuditLogs,
     };
   });
+
+  // Admin Mode state (PIN 5313)
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState<boolean>(() => {
+    return sessionStorage.getItem('homs_passcode_unlocked') === 'true';
+  });
+
+  const unlockAdminMode = (pin: string) => {
+    if (pin.trim() === '5313') {
+      setIsAdminUnlocked(true);
+      sessionStorage.setItem('homs_passcode_unlocked', 'true');
+      return { success: true };
+    } else {
+      return { success: false, error: 'PIN Code keselamatan tidak sah.' };
+    }
+  };
+
+  const lockAdminMode = () => {
+    setIsAdminUnlocked(false);
+    sessionStorage.removeItem('homs_passcode_unlocked');
+  };
 
   // Save state on change
   useEffect(() => {
@@ -286,6 +329,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       bookings: prev.bookings.map(b => b.id === bookingId ? { ...b, status: 'CANCELLED' } : b),
     }));
     addAuditLog('CANCEL_BOOKING', `Cancelled booking ID ${bookingId}.`);
+  };
+
+  const deleteBookingPermanently = (bookingId: string) => {
+    setState(prev => ({
+      ...prev,
+      bookings: prev.bookings.filter(b => b.id !== bookingId),
+    }));
+    addAuditLog('DELETE_BOOKING_PERMANENT', `Permanently deleted booking ID ${bookingId}.`);
   };
 
   const markGuestCheckedOut = (bookingId: string) => {
@@ -610,6 +661,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         ...state,
+        isAdminUnlocked,
+        unlockAdminMode,
+        lockAdminMode,
         setCurrentRole,
         setCurrentCleanerId,
         resetDemoData,
@@ -619,6 +673,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createBooking,
         updateBooking,
         cancelBooking,
+        deleteBookingPermanently,
         markGuestCheckedOut,
         approveEarlyCheckIn,
         assignCleaningTask,

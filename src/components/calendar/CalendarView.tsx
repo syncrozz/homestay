@@ -16,12 +16,16 @@ import {
   Home,
   MessageSquare,
   AlertTriangle,
-  Users
+  Users,
+  Sliders,
+  Search
 } from 'lucide-react';
 
 interface CalendarViewProps {
   onOpenNewBookingModal: (unitId?: string, dateStr?: string) => void;
   onOpenBookingDetailsModal: (booking: Booking) => void;
+  onOpenAdjustmentModal?: (booking?: Booking) => void;
+  onOpenCustomerLookupModal?: () => void;
 }
 
 type ViewMode = 'month' | 'week' | 'day';
@@ -29,8 +33,11 @@ type ViewMode = 'month' | 'week' | 'day';
 export const CalendarView: React.FC<CalendarViewProps> = ({
   onOpenNewBookingModal,
   onOpenBookingDetailsModal,
+  onOpenAdjustmentModal,
+  onOpenCustomerLookupModal,
 }) => {
   const {
+    currentRole,
     units,
     bookings,
     cleaningTasks,
@@ -127,12 +134,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return days;
   }, [currentDate, todayStr]);
 
-  // Helper to find bookings active on a given date for a unit
+  // Helper to find bookings active on a given date for a unit (night-of-stay based)
   const getBookingsForUnitDate = (unitId: string, dateStr: string): Booking[] => {
     return bookings.filter((b) => {
       if (b.unitId !== unitId) return false;
       if (b.status === 'CANCELLED') return false;
-      return dateStr >= b.checkInDate && dateStr <= b.checkOutDate;
+      if (b.checkInDate === b.checkOutDate) {
+        return dateStr === b.checkInDate;
+      }
+      return dateStr >= b.checkInDate && dateStr < b.checkOutDate;
     });
   };
 
@@ -222,16 +232,61 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
           </div>
 
-          {/* New Booking Action */}
-          <button
-            onClick={() => onOpenNewBookingModal()}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold shadow-xs transition-all"
-          >
-            <Plus className="w-4 h-4 text-blue-400" />
-            <span>New Booking</span>
-          </button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            {onOpenCustomerLookupModal && (
+              <button
+                onClick={onOpenCustomerLookupModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
+                title="Cari tempahan dengan e-mel & urus tempahan"
+              >
+                <Search className="w-4 h-4 text-emerald-200" />
+                <span>Cari Tempahan Saya</span>
+              </button>
+            )}
+
+            {currentRole === 'OWNER' && onOpenAdjustmentModal && (
+              <button
+                onClick={() => onOpenAdjustmentModal()}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                title="Penyelarasan & Details Tempahan (Passcode 5313)"
+              >
+                <Sliders className="w-4 h-4 text-blue-600" />
+                <span>Penyelarasan</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => onOpenNewBookingModal()}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold shadow-xs transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-blue-400" />
+              <span>New Booking</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Customer Mode Helper Banner */}
+      {currentRole === 'CUSTOMER' && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-medium flex items-center justify-between gap-2 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="text-base">📅</span>
+            <div>
+              <strong className="font-extrabold text-emerald-950 block">Panduan Tempahan Customer:</strong>
+              <span>Tekan pada petak tarikh di kalendar untuk membuat tempahan baru. Untuk melihat atau mengubah tempahan atas nama anda, sila tekan butang <strong>'Cari Tempahan Saya'</strong> di atas.</span>
+            </div>
+          </div>
+          {onOpenCustomerLookupModal && (
+            <button
+              onClick={onOpenCustomerLookupModal}
+              className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg shrink-0 text-xs shadow-2xs"
+            >
+              Semak Tempahan
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Date Title Banner */}
       <div className="flex items-center justify-between px-2">
@@ -242,7 +297,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             ...(viewMode === 'day' ? { day: 'numeric', weekday: 'long' } : {}),
           })}
         </h2>
-        <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
+        <div className="flex items-center gap-3 text-xs font-medium text-slate-600 flex-wrap">
+          <span className="flex items-center gap-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-400"></span> Tarikh Lepas
+          </span>
           <span className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Ready
           </span>
@@ -260,9 +318,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* MONTH VIEW */}
       {viewMode === 'month' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-300 shadow-sm overflow-hidden">
           {/* Day of Week Headers */}
-          <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-200 text-center text-xs font-bold text-slate-600 py-2.5">
+          <div className="grid grid-cols-7 bg-slate-100 border-b border-slate-300 text-center text-xs font-bold text-slate-700 py-2.5">
             <div>Sun</div>
             <div>Mon</div>
             <div>Tue</div>
@@ -273,7 +331,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           {/* Grid Cells */}
-          <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100">
+          <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-300">
             {monthDays.map((dayObj, index) => {
               // Find all bookings across active units for this day
               const dayBookings: Array<{ booking: Booking; unit: Unit }> = [];
@@ -282,18 +340,36 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 bks.forEach((b) => dayBookings.push({ booking: b, unit }));
               });
 
+              const isPast = dayObj.dateStr < todayStr;
+
               return (
                 <div
                   key={index}
-                  className={`min-h-[120px] p-2 transition-colors ${
-                    !dayObj.isCurrentMonth ? 'bg-slate-50/50 text-slate-400' : 'bg-white'
+                  onClick={() => {
+                    if (isPast) {
+                      // Do not allow re-booking on past dates
+                      return;
+                    }
+                    if (dayObj.isCurrentMonth) {
+                      onOpenNewBookingModal(undefined, dayObj.dateStr);
+                    }
+                  }}
+                  className={`min-h-[120px] p-2 transition-colors relative ${
+                    isPast
+                      ? 'bg-slate-100/90 text-slate-400 cursor-not-allowed border-slate-200'
+                      : dayObj.isCurrentMonth
+                      ? 'cursor-pointer hover:bg-slate-50/80 bg-white'
+                      : 'bg-slate-50/50 text-slate-400'
                   } ${dayObj.isToday ? 'ring-2 ring-emerald-500 ring-inset bg-emerald-50/20' : ''}`}
+                  title={isPast ? 'Tarikh ini telah berlalu (tidak boleh ditempah semula)' : undefined}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span
                       className={`text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ${
                         dayObj.isToday
                           ? 'bg-emerald-600 text-white shadow-2xs'
+                          : isPast
+                          ? 'text-slate-400'
                           : dayObj.isCurrentMonth
                           ? 'text-slate-800'
                           : 'text-slate-400'
@@ -301,15 +377,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     >
                       {dayObj.date.getDate()}
                     </span>
-                    {dayObj.isCurrentMonth && (
-                      <button
-                        onClick={() => onOpenNewBookingModal(undefined, dayObj.dateStr)}
-                        className="text-slate-300 hover:text-emerald-600 transition-colors"
-                        title="Add booking on this date"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    )}
                   </div>
 
                   {/* Booking Cards on Grid */}
@@ -321,7 +388,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       return (
                         <div
                           key={booking.id}
-                          onClick={() => onOpenBookingDetailsModal(booking)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (currentRole === 'CUSTOMER' && onOpenCustomerLookupModal) {
+                              onOpenCustomerLookupModal();
+                            } else {
+                              onOpenBookingDetailsModal(booking);
+                            }
+                          }}
                           className="p-1.5 rounded-lg bg-blue-50/90 border border-blue-200 hover:border-blue-400 hover:shadow-2xs transition-all cursor-pointer group"
                         >
                           {/* Booking Card with Strict Visual Hierarchy */}
@@ -336,15 +410,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                               </span>
                             </div>
 
-                            {/* 2. Guest Name */}
+                            {/* 2. Guest Name / Booking Notice */}
                             <div className="font-bold text-slate-900 truncate">
-                              {booking.guestName}
+                              {currentRole === 'CUSTOMER' ? `🔒 (${booking.guestName})` : booking.guestName}
                             </div>
 
                             {/* 3. Stay / Check-in / Check-out & Unit Status */}
                             <div className="flex items-center justify-between text-[10px] text-slate-600 font-medium">
-                              <span className="truncate">
-                                {isCheckInDay ? `🔑 In ${booking.checkInTime}` : isCheckOutDay ? `🚪 Out ${booking.checkOutTime}` : 'Stay'}
+                              <span className="truncate" title={`Check-in: ${booking.checkInDate} ${booking.checkInTime} | Check-out: ${booking.checkOutDate} ${booking.checkOutTime}`}>
+                                {isCheckInDay
+                                  ? `🔑 In ${booking.checkInTime} (Out ${booking.checkOutDate.split('-').slice(1).reverse().join('/')})`
+                                  : isCheckOutDay
+                                  ? `🚪 Out ${booking.checkOutTime}`
+                                  : 'Stay'}
                               </span>
                               <span className="text-[9px] font-bold uppercase px-1 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200 shrink-0 ml-1">
                                 {unit.status.replace('_', ' ')}
@@ -352,9 +430,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                             </div>
 
                             {/* 4. Important note / Remark */}
-                            {booking.remark && (
+                            {booking.remark ? (
                               <div className="px-1.5 py-0.5 bg-amber-100/90 text-amber-900 rounded text-[10px] truncate border border-amber-200 font-medium">
                                 💬 {booking.remark}
+                              </div>
+                            ) : (
+                              <div className="px-1.5 py-0.5 bg-blue-100/70 text-blue-900 rounded text-[10px] truncate border border-blue-200 font-medium">
+                                💬 Ada Booking
                               </div>
                             )}
                           </div>
@@ -371,10 +453,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* WEEK & DAY VIEWS: Detailed Operational Gantt Matrix */}
       {(viewMode === 'week' || viewMode === 'day') && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-x-auto">
+        <div className="bg-white rounded-xl border border-slate-300 shadow-sm overflow-x-auto">
           <div className="min-w-[700px]">
             {/* Header row with dates */}
-            <div className="grid grid-cols-8 border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 divide-x divide-slate-200">
+            <div className="grid grid-cols-8 border-b border-slate-300 bg-slate-100 text-xs font-bold text-slate-700 divide-x divide-slate-300">
               <div className="p-3 text-slate-500">Units</div>
               {(viewMode === 'week' ? weekDays : [{ date: currentDate, dateStr: formatDateStr(currentDate), isToday: formatDateStr(currentDate) === todayStr }]).map((d, i) => (
                 <div
@@ -396,7 +478,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               return (
                 <div
                   key={unit.id}
-                  className="grid grid-cols-8 divide-x divide-y divide-slate-200 items-center min-h-[100px]"
+                  className="grid grid-cols-8 divide-x divide-y divide-slate-300 items-center min-h-[100px]"
                 >
                   {/* Unit Metadata Column */}
                   <div className="p-3 space-y-1.5 bg-slate-50/50">
@@ -415,19 +497,26 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   {/* Day cells for this unit */}
                   {(viewMode === 'week' ? weekDays : [{ date: currentDate, dateStr: formatDateStr(currentDate), isToday: formatDateStr(currentDate) === todayStr }]).map((dayObj, i) => {
                     const unitBookings = getBookingsForUnitDate(unit.id, dayObj.dateStr);
+                    const isPast = dayObj.dateStr < todayStr;
 
                     return (
                       <div key={i} className="p-2 space-y-2 h-full flex flex-col justify-between">
                         {unitBookings.length === 0 ? (
-                          <div className="h-full flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all text-center">
-                            <span className="text-[11px] text-slate-400 font-medium">Available</span>
-                            <button
-                              onClick={() => onOpenNewBookingModal(unit.id, dayObj.dateStr)}
-                              className="mt-1 text-[10px] text-emerald-700 font-bold hover:underline flex items-center gap-1"
+                          isPast ? (
+                            <div
+                              className="h-full min-h-[60px] flex flex-col items-center justify-center p-2 rounded-xl bg-slate-100/90 border border-slate-200 text-center cursor-not-allowed opacity-75"
+                              title="Tarikh ini telah berlalu dan tidak boleh ditempah semula"
                             >
-                              <Plus className="w-3 h-3" /> Book
-                            </button>
-                          </div>
+                              <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Tarikh Lepas</span>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() => onOpenNewBookingModal(unit.id, dayObj.dateStr)}
+                              className="h-full min-h-[60px] flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 transition-all text-center cursor-pointer"
+                            >
+                              <span className="text-[11px] text-slate-400 font-medium">Available</span>
+                            </div>
+                          )
                         ) : (
                           unitBookings.map((booking) => {
                             const isCheckoutToday = booking.checkOutDate === todayStr && dayObj.dateStr === todayStr;
@@ -460,55 +549,57 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                   )}
                                 </div>
 
-                                {/* OPERATIONAL ACTION BUTTONS DIRECTLY ON CARD */}
-                                <div className="pt-1 flex flex-col gap-1">
-                                  {/* Action 1: GUEST CHECKED OUT */}
-                                  {isCheckoutToday && unit.status === 'OCCUPIED' && (
-                                    <button
-                                      onClick={() => markGuestCheckedOut(booking.id)}
-                                      className="w-full py-1 px-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all"
-                                    >
-                                      <LogOut className="w-3.5 h-3.5" />
-                                      <span>GUEST CHECKED OUT</span>
-                                    </button>
-                                  )}
+                                {/* OPERATIONAL ACTION BUTTONS DIRECTLY ON CARD (FOR OWNER/CLEANER) */}
+                                {currentRole !== 'CUSTOMER' && (
+                                  <div className="pt-1 flex flex-col gap-1">
+                                    {/* Action 1: GUEST CHECKED OUT */}
+                                    {isCheckoutToday && unit.status === 'OCCUPIED' && (
+                                      <button
+                                        onClick={() => markGuestCheckedOut(booking.id)}
+                                        className="w-full py-1 px-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all"
+                                      >
+                                        <LogOut className="w-3.5 h-3.5" />
+                                        <span>GUEST CHECKED OUT</span>
+                                      </button>
+                                    )}
 
-                                  {/* Action 2: SEND CLEANING TASK */}
-                                  {unit.status === 'AWAITING_CLEANING' && (
-                                    <button
-                                      onClick={() => {
-                                        if (!activeCleaningTask) {
-                                          assignCleaningTask(unit.id, undefined, booking.id);
-                                        }
-                                        const taskToDispatch = activeCleaningTask || cleaningTasks[0];
-                                        if (taskToDispatch) {
-                                          dispatchCleanerWhatsApp(taskToDispatch.id);
-                                        }
-                                      }}
-                                      className="w-full py-1 px-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all"
-                                    >
-                                      <Send className="w-3.5 h-3.5" />
-                                      <span>SEND CLEANING TASK</span>
-                                    </button>
-                                  )}
+                                    {/* Action 2: SEND CLEANING TASK */}
+                                    {unit.status === 'AWAITING_CLEANING' && (
+                                      <button
+                                        onClick={() => {
+                                          if (!activeCleaningTask) {
+                                            assignCleaningTask(unit.id, undefined, booking.id);
+                                          }
+                                          const taskToDispatch = activeCleaningTask || cleaningTasks[0];
+                                          if (taskToDispatch) {
+                                            dispatchCleanerWhatsApp(taskToDispatch.id);
+                                          }
+                                        }}
+                                        className="w-full py-1 px-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all"
+                                      >
+                                        <Send className="w-3.5 h-3.5" />
+                                        <span>SEND CLEANING TASK</span>
+                                      </button>
+                                    )}
 
-                                  {/* Action 3: ALLOW EARLY CHECK-IN */}
-                                  {booking.checkInDate === todayStr && earlyCheckInEval.canBeApproved && !booking.earlyCheckInApproved && (
-                                    <button
-                                      onClick={() => approveEarlyCheckIn(booking.id, '14:00')}
-                                      className="w-full py-1 px-2 rounded-lg bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all"
-                                    >
-                                      <Sparkles className="w-3.5 h-3.5" />
-                                      <span>ALLOW EARLY CHECK-IN</span>
-                                    </button>
-                                  )}
+                                    {/* Action 3: ALLOW EARLY CHECK-IN */}
+                                    {booking.checkInDate === todayStr && earlyCheckInEval.canBeApproved && !booking.earlyCheckInApproved && (
+                                      <button
+                                        onClick={() => approveEarlyCheckIn(booking.id, '14:00')}
+                                        className="w-full py-1 px-2 rounded-lg bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all"
+                                      >
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                        <span>ALLOW EARLY CHECK-IN</span>
+                                      </button>
+                                    )}
 
-                                  {booking.earlyCheckInApproved && (
-                                    <span className="text-[10px] text-teal-300 font-bold flex items-center gap-1">
-                                      ✨ Early check-in approved ({booking.approvedEarlyCheckInTime || '2:00 PM'})
-                                    </span>
-                                  )}
-                                </div>
+                                    {booking.earlyCheckInApproved && (
+                                      <span className="text-[10px] text-teal-300 font-bold flex items-center gap-1">
+                                        ✨ Early check-in approved ({booking.approvedEarlyCheckInTime || '2:00 PM'})
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             );
                           })

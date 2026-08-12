@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Cleaner, ChecklistItemTemplate } from '../../types';
 import {
@@ -40,6 +40,7 @@ export const AdminSettingsView: React.FC = () => {
   // WhatsApp form state
   const [cleanerTemplate, setCleanerTemplate] = useState(settings.whatsappCleanerTemplate);
   const [guestTemplate, setGuestTemplate] = useState(settings.whatsappGuestCheckInTemplate);
+  const [ownerAlertTemplate, setOwnerAlertTemplate] = useState(settings.whatsappOwnerAlertTemplate || '');
 
   // Cleaner modal state
   const [showCleanerModal, setShowCleanerModal] = useState(false);
@@ -53,6 +54,21 @@ export const AdminSettingsView: React.FC = () => {
   const [ckCategory, setCkCategory] = useState<'BEDROOM' | 'BATHROOM' | 'GENERAL' | 'KITCHEN' | 'REFRESHMENTS'>('BEDROOM');
   const [ckTitle, setCkTitle] = useState('');
   const [ckIsRequired, setCkIsRequired] = useState(true);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showCleanerModal) setShowCleanerModal(false);
+        if (showChecklistModal) setShowChecklistModal(false);
+      }
+    };
+    if (showCleanerModal || showChecklistModal) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showCleanerModal, showChecklistModal]);
 
   const handleSaveProperty = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +89,7 @@ export const AdminSettingsView: React.FC = () => {
       ...settings,
       whatsappCleanerTemplate: cleanerTemplate,
       whatsappGuestCheckInTemplate: guestTemplate,
+      whatsappOwnerAlertTemplate: ownerAlertTemplate,
     });
     alert('WhatsApp message templates updated!');
   };
@@ -407,7 +424,19 @@ export const AdminSettingsView: React.FC = () => {
               value={guestTemplate}
               onChange={(e) => setGuestTemplate(e.target.value)}
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs"
-              rows={6}
+              rows={5}
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">
+              Owner Booking Alert Template (Tokens: &#123;property_name&#125;, &#123;unit_name&#125;, &#123;guest_name&#125;, &#123;guest_phone&#125;, &#123;guest_count&#125;, &#123;check_in_date&#125;, &#123;check_in_time&#125;, &#123;check_out_date&#125;, &#123;check_out_time&#125;, &#123;total_amount&#125;, &#123;deposit_amount&#125;, &#123;balance_amount&#125;, &#123;payment_status&#125;, &#123;remark_section&#125;)
+            </label>
+            <textarea
+              value={ownerAlertTemplate}
+              onChange={(e) => setOwnerAlertTemplate(e.target.value)}
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs"
+              rows={8}
             />
           </div>
 
