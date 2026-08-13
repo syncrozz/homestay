@@ -199,6 +199,8 @@ export interface SystemSettings {
   propertyName: string;
   propertyAddress: string;
   propertyContact: string;
+  ownerWhatsapp?: string;
+  ownerEmail?: string;
   defaultCheckInTime: string;
   defaultCheckOutTime: string;
   whatsappCleanerTemplate: string;

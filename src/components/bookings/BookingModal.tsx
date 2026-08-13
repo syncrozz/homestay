@@ -216,13 +216,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const handleSendCustomerWhatsApp = () => {
     if (!confirmedBooking) return;
     const text = generateOwnerAlertText(confirmedBooking);
-    openWhatsAppChat(confirmedBooking.guestPhone, text);
+    const ownerPhone = settings.ownerWhatsapp || settings.propertyContact || '+60123456789';
+    openWhatsAppChat(ownerPhone, text);
   };
 
   const handleSendOwnerWhatsApp = () => {
     if (!confirmedBooking) return;
     const text = generateOwnerAlertText(confirmedBooking);
-    const ownerPhone = settings.propertyContact || '+60123456789';
+    const ownerPhone = settings.ownerWhatsapp || settings.propertyContact || '+60123456789';
     openWhatsAppChat(ownerPhone, text);
   };
 
@@ -239,7 +240,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       checkOutDate: confirmedBooking.checkOutDate,
       checkOutTime: confirmedBooking.checkOutTime,
     });
-    openWhatsAppChat(confirmedBooking.guestPhone, text);
+    const ownerPhone = settings.ownerWhatsapp || settings.propertyContact || '+60123456789';
+    openWhatsAppChat(ownerPhone, text);
   };
 
   return (
@@ -355,30 +357,30 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   ) : (
                     <>
                       <Copy className="w-4 h-4 text-slate-600" />
-                      <span>Salin Alert Customer</span>
+                      <span>Salin Alert Owner</span>
                     </>
                   )}
                 </button>
 
-                {/* Hantar WhatsApp ke Customer */}
+                {/* Hantar WhatsApp ke Owner */}
                 <button
                   type="button"
                   onClick={handleSendCustomerWhatsApp}
                   className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>Whatsapp Customer</span>
+                  <span>Whatsapp Owner</span>
                 </button>
               </div>
 
-              {/* Hantar WhatsApp Guest */}
+              {/* Hantar WhatsApp Owner */}
               <button
                 type="button"
                 onClick={handleSendGuestWhatsApp}
                 className="w-full py-2 px-3 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 mt-1 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5 text-blue-600" />
-                <span>Hantar WhatsApp Surat Check-In ke Guest</span>
+                <span>Hantar WhatsApp Surat Check-In ke Owner</span>
               </button>
             </div>
 

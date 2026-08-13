@@ -25,6 +25,8 @@ export const initialSettings: SystemSettings = {
   propertyName: 'Homestay',
   propertyAddress: 'Jalan Beachfront Villa 1, Penang',
   propertyContact: '+60123456789',
+  ownerWhatsapp: '+60123456789',
+  ownerEmail: 'owner@homestay.com',
   defaultCheckInTime: '15:00',
   defaultCheckOutTime: '12:00',
   whatsappCleanerTemplate: `🧹 CLEANING TASK

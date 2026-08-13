@@ -282,12 +282,12 @@ export const BookingAdjustmentModal: React.FC<BookingAdjustmentModalProps> = ({
 
   const handleSendCustomerWhatsApp = () => {
     const text = generateOwnerText();
-    openWhatsAppChat(guestPhone, text);
+    openWhatsAppChat(settings.ownerWhatsapp || settings.propertyContact || '+60123456789', text);
   };
 
   const handleSendOwnerWhatsApp = () => {
     const text = generateOwnerText();
-    openWhatsAppChat(settings.propertyContact || '+60123456789', text);
+    openWhatsAppChat(settings.ownerWhatsapp || settings.propertyContact || '+60123456789', text);
   };
 
   const handleSendGuestWhatsApp = () => {
@@ -679,7 +679,7 @@ export const BookingAdjustmentModal: React.FC<BookingAdjustmentModalProps> = ({
                     }`}
                   >
                     {copiedText ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                    <span>Salin Alert Customer</span>
+                    <span>Salin Alert Owner</span>
                   </button>
 
                   <button
@@ -688,7 +688,7 @@ export const BookingAdjustmentModal: React.FC<BookingAdjustmentModalProps> = ({
                     className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    <span>Whatsapp Customer</span>
+                    <span>Whatsapp Owner</span>
                   </button>
 
                   <button

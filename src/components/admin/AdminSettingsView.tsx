@@ -11,7 +11,9 @@ import {
   Trash2,
   CheckCircle2,
   Save,
-  Phone
+  Phone,
+  Mail,
+  ShieldAlert
 } from 'lucide-react';
 
 export const AdminSettingsView: React.FC = () => {
@@ -30,10 +32,12 @@ export const AdminSettingsView: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'property' | 'cleaners' | 'checklist' | 'whatsapp'>('property');
 
-  // Property form state
+  // Property & Owner form state
   const [propertyName, setPropertyName] = useState(settings.propertyName);
   const [propertyAddress, setPropertyAddress] = useState(settings.propertyAddress);
   const [propertyContact, setPropertyContact] = useState(settings.propertyContact);
+  const [ownerWhatsapp, setOwnerWhatsapp] = useState(settings.ownerWhatsapp || settings.propertyContact || '');
+  const [ownerEmail, setOwnerEmail] = useState(settings.ownerEmail || '');
   const [defaultCheckInTime, setDefaultCheckInTime] = useState(settings.defaultCheckInTime);
   const [defaultCheckOutTime, setDefaultCheckOutTime] = useState(settings.defaultCheckOutTime);
 
@@ -77,10 +81,12 @@ export const AdminSettingsView: React.FC = () => {
       propertyName,
       propertyAddress,
       propertyContact,
+      ownerWhatsapp,
+      ownerEmail,
       defaultCheckInTime,
       defaultCheckOutTime,
     });
-    alert('Property settings saved successfully!');
+    alert('Property & Owner settings saved successfully!');
   };
 
   const handleSaveWhatsApp = (e: React.FormEvent) => {
@@ -214,13 +220,53 @@ export const AdminSettingsView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Contact Phone Number</label>
+            <label className="block font-bold text-slate-700 mb-1">Contact Phone Number (Homestay / Support)</label>
             <input
               type="text"
               value={propertyContact}
               onChange={(e) => setPropertyContact(e.target.value)}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
             />
+          </div>
+
+          {/* Owner Administration Section */}
+          <div className="pt-3 border-t border-slate-200 mt-4 space-y-3">
+            <div className="flex items-center gap-1.5 text-slate-800 font-extrabold text-sm">
+              <ShieldAlert className="w-4 h-4 text-emerald-600" />
+              <span>Maklumat Owner / Pentadbiran System</span>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Nombor WhatsApp Owner akan digunakan secara automatik sebagai penerima alert tempahan baharu & urusan pentadbiran.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-emerald-600" /> No. WhatsApp Owner
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. +60123456789"
+                  value={ownerWhatsapp}
+                  onChange={(e) => setOwnerWhatsapp(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5 text-blue-600" /> E-mel Owner (Pentadbiran)
+                </label>
+                <input
+                  type="email"
+                  placeholder="e.g. owner@homestay.com"
+                  value={ownerEmail}
+                  onChange={(e) => setOwnerEmail(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

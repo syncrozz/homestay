@@ -208,7 +208,7 @@ export const BookingListView: React.FC<BookingListViewProps> = ({
                     </td>
 
                     <td className="p-3 text-right space-x-1">
-                      {/* Salin Teks Alert Customer */}
+                      {/* Salin Teks Alert Owner */}
                       <button
                         onClick={() => handleCopyOwnerAlert(b)}
                         className={`p-1.5 rounded-lg transition-colors ${
@@ -216,12 +216,12 @@ export const BookingListView: React.FC<BookingListViewProps> = ({
                             ? 'text-emerald-700 bg-emerald-100 font-bold'
                             : 'text-slate-600 hover:bg-slate-100'
                         }`}
-                        title="Salin Teks Alert Customer"
+                        title="Salin Teks Alert Owner"
                       >
                         {copiedId === b.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                       </button>
 
-                      {/* WhatsApp Customer */}
+                      {/* WhatsApp Owner */}
                       <button
                         onClick={() => {
                           const text = formatOwnerBookingAlertMessage({
@@ -241,10 +241,10 @@ export const BookingListView: React.FC<BookingListViewProps> = ({
                             paymentStatus: b.paymentStatus,
                             remark: b.remark,
                           });
-                          openWhatsAppChat(b.guestPhone, text);
+                          openWhatsAppChat(settings.ownerWhatsapp || settings.propertyContact || '+60123456789', text);
                         }}
                         className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                        title="Hantar WhatsApp ke Customer"
+                        title="Hantar WhatsApp ke Owner"
                       >
                         <Send className="w-4 h-4" />
                       </button>
