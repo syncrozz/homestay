@@ -18,7 +18,9 @@ import {
   AlertTriangle,
   Users,
   Sliders,
-  Search
+  Search,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface CalendarViewProps {
@@ -51,6 +53,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedUnitId, setSelectedUnitId] = useState<string>('ALL');
+  const [isPastWeeksMinimized, setIsPastWeeksMinimized] = useState<boolean>(true);
 
   // Format YYYY-MM-DD
   const formatDateStr = (d: Date): string => d.toISOString().split('T')[0];
@@ -116,6 +119,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
     return days;
   }, [currentDate, todayStr]);
+
+  // Group monthDays into weeks (7 days per row)
+  const weeks = useMemo(() => {
+    const result: Array<typeof monthDays> = [];
+    for (let i = 0; i < monthDays.length; i += 7) {
+      result.push(monthDays.slice(i, i + 7));
+    }
+    return result;
+  }, [monthDays]);
+
+  const hasPastWeeks = useMemo(() => {
+    return weeks.some((w) => w.every((d) => d.dateStr < todayStr));
+  }, [weeks, todayStr]);
 
   // Compute week calendar days
   const weekDays = useMemo(() => {
@@ -298,6 +314,25 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           })}
         </h2>
         <div className="flex items-center gap-2.5 text-xs font-medium text-slate-600 flex-wrap">
+          {viewMode === 'month' && hasPastWeeks && (
+            <button
+              onClick={() => setIsPastWeeksMinimized(!isPastWeeksMinimized)}
+              className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs mr-1"
+              title={isPastWeeksMinimized ? "Kembangkan minggu-minggu lepas" : "Minimize minggu-minggu lepas"}
+            >
+              {isPastWeeksMinimized ? (
+                <>
+                  <Eye className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Kembangkan Minggu Lepas</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Minimize Minggu Lepas</span>
+                </>
+              )}
+            </button>
+          )}
           <span className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-400"></span> Tarikh Lepas
           </span>
@@ -331,9 +366,47 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <div>Sat</div>
             </div>
 
-            {/* Grid Cells */}
-            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-300">
-            {monthDays.map((dayObj, index) => {
+            {/* Grid Cells - Grouped by Week */}
+            <div className="divide-y divide-slate-300">
+              {weeks.map((week, weekIdx) => {
+                const isPastWeek = week.every((d) => d.dateStr < todayStr);
+                const isMinimized = isPastWeek && isPastWeeksMinimized;
+
+                if (isMinimized) {
+                  return (
+                    <div
+                      key={weekIdx}
+                      className="grid grid-cols-7 divide-x divide-slate-200 bg-slate-100/90 text-slate-400 min-h-[36px] transition-all hover:bg-slate-200/70 cursor-pointer"
+                      onClick={() => setIsPastWeeksMinimized(false)}
+                      title="Satu minggu lepas (dikuncupkan). Klik untuk kembangkan minggu lepas."
+                    >
+                      {week.map((dayObj, dayIdx) => {
+                        const dayBookings: Array<{ booking: Booking; unit: Unit }> = [];
+                        activeUnits.forEach((unit) => {
+                          const bks = getBookingsForUnitDate(unit.id, dayObj.dateStr);
+                          bks.forEach((b) => dayBookings.push({ booking: b, unit }));
+                        });
+
+                        return (
+                          <div key={dayIdx} className="px-2 py-1.5 flex items-center justify-between min-h-[36px]">
+                            <span className="text-[11px] font-extrabold text-slate-400">
+                              {dayObj.date.getDate()}
+                            </span>
+                            {dayBookings.length > 0 && (
+                              <span className="text-[9px] font-bold text-slate-500 bg-slate-200 px-1.5 py-0.2 rounded border border-slate-300">
+                                {dayBookings.length} bks
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={weekIdx} className="grid grid-cols-7 divide-x divide-slate-300 auto-rows-fr">
+                    {week.map((dayObj, dayIdx) => {
               // Find all bookings across active units for this day
               const dayBookings: Array<{ booking: Booking; unit: Unit }> = [];
               activeUnits.forEach((unit) => {
@@ -345,7 +418,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
               return (
                 <div
-                  key={index}
+                  key={dayIdx}
                   onClick={() => {
                     if (isPast) {
                       // Do not allow re-booking on past dates
@@ -449,6 +522,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               );
             })}
           </div>
+        );
+      })}
+    </div>
         </div>
       </div>
       )}
