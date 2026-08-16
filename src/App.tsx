@@ -106,10 +106,16 @@ const MainContent: React.FC = () => {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             System Status: <span className="text-emerald-400 font-semibold">Operational</span>
           </span>
-          <span className="text-slate-400 hidden sm:inline italic">HOMS Ops Console v1.2</span>
         </div>
         <div className="flex items-center gap-4 text-slate-300">
-          <span>Property: <span className="text-blue-300 font-semibold">{settings.propertyName || 'Homestay'}</span></span>
+          <a
+            href="https://wa.me/60145313756"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors flex items-center gap-1 group"
+          >
+            <span>Develop By <span className="text-blue-400 group-hover:text-blue-300 font-semibold underline underline-offset-2">Syncrozz</span></span>
+          </a>
         </div>
       </footer>
 

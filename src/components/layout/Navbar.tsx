@@ -116,9 +116,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="w-6 h-6 sm:w-7 sm:h-7 bg-slate-800 group-hover:bg-slate-700 rounded flex items-center justify-center p-1 shadow-xs shrink-0 border border-slate-700 transition-colors">
             <img src="/favicon.svg" alt="Homestay Logo" className="w-full h-full object-contain" />
           </div>
-          <div className="flex items-center gap-1.5 font-bold text-slate-100 group-hover:text-white tracking-tight text-xs sm:text-sm max-w-[130px] sm:max-w-none truncate transition-colors">
-            <span className="truncate">{settings.propertyName || 'HOMS'}</span>
-            <span className="font-normal text-slate-400 hidden xs:inline">| Ops</span>
+          <div className="flex items-center font-black tracking-tight text-xs sm:text-sm max-w-[200px] sm:max-w-none truncate transition-colors">
+            <span className="text-white">HOME</span>
+            <span className="text-blue-400">SYNC</span>
           </div>
         </button>
 
